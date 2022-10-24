@@ -68,8 +68,8 @@ export default class ProfileLogin extends Vue {
   valid = false;
 
   mounted() {
-    (this.$refs.input as any).focus();
-    console.log(this.$refs.form);
+    const input = this.$refs.input as unknown as { focus(): void };
+    input.focus();
   }
 
   onLogin() {

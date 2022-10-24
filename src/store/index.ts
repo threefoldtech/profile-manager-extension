@@ -1,3 +1,4 @@
+// import { NetworkEnv } from "grid3_client/dist/es6/index";
 import Vue from "vue";
 import Vuex from "vuex";
 import { v4 } from "uuid";
@@ -9,7 +10,7 @@ export interface Profile {
   name: string;
   mnemonics: string;
   ssh: string;
-  network: string;
+  network: /* NetworkEnv */ string;
   disableSSH: boolean;
 }
 
@@ -24,12 +25,12 @@ export interface ProfilesStore {
   active: string | null;
 }
 
-export function createProfile(options: Partial<Profile>): Profile {
+export function createProfile(options: Partial<Profile> = {}): Profile {
   return {
     id: options.id || v4(),
     name: options.name || "NewProfile",
     mnemonics: options.mnemonics || "",
-    network: options.network || "dev",
+    network: options.network || /* NetworkEnv.dev */ "dev",
     ssh: options.ssh || "",
     disableSSH: false,
   };
@@ -58,6 +59,16 @@ export default new Vuex.Store<ProfilesStore>({
     },
   },
   mutations: {},
-  actions: {},
+  actions: {
+    addProfile({ state }) {
+      state.profiles.push(createProfile());
+    },
+    removeProfile({ state }, id: string) {
+      state.profiles = state.profiles.filter((profile) => profile.id !== id);
+      if (state.active === id) {
+        state.active = null;
+      }
+    },
+  },
   modules: {},
 });

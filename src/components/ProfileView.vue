@@ -19,6 +19,14 @@
       v-model="profile.name"
     ></v-text-field>
 
+    <v-select
+      :items="networks"
+      item-text="name"
+      item-value="value"
+      v-model="profile.network"
+      label="Select a network"
+    />
+
     <v-text-field
       label="Mnemonics"
       placeholder="Enter Your Polkadot Mnemonics or TFChain secret"
@@ -45,7 +53,14 @@
         ]"
       ></v-text-field>
 
-      <v-switch v-model="profile.disableSSH" @change="$refs.ssh.validate()" />
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <div v-bind="attrs" v-on="on">
+            <v-switch v-model="profile.disableSSH" @change="$refs.ssh.validate()" />
+          </div>
+        </template>
+        <span>On disable the deployed solutions'll be inaccessible.</span>
+      </v-tooltip>
     </div>
   </v-form>
 </template>
@@ -54,9 +69,7 @@
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { Profile, FullProfile } from "@/store";
 import { required, minLength, maxLength } from "@/utils/validators";
-import { validateMnemonic, mnemonicToEntropy } from "bip39";
-
-console.log({ validateMnemonic, mnemonicToEntropy });
+import { validateMnemonic } from "bip39";
 
 @Component({
   name: "ProfileView",
@@ -72,6 +85,13 @@ console.log({ validateMnemonic, mnemonicToEntropy });
 export default class ProfileView extends Vue {
   @Prop({ required: true }) profile!: Profile;
 
+  networks = [
+    { name: "Mainnet", value: "main" },
+    { name: "Testnet", value: "test" },
+    { name: "QAnet", value: "qa" },
+    { name: "Devnet", value: "dev" },
+  ];
+
   show = false;
 
   valid = false;
@@ -85,7 +105,8 @@ export default class ProfileView extends Vue {
   }
 
   mounted() {
-    (this.$refs.input as any).focus();
+    const input = this.$refs.input as unknown as { focus(): void };
+    input.focus();
   }
 
   activateProfile() {

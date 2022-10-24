@@ -1,8 +1,20 @@
 <template>
   <section>
     <v-tabs centered v-model="tab">
-      <v-tab v-for="(profile, index) in profiles" :key="profile.id">
+      <v-tab v-for="(profile, index) in profiles" :key="profile.id" class="profile-tab">
         {{ profile.name ? profile.name : `Profile ${index}` }}
+        <v-btn
+          v-if="index !== 0"
+          fab
+          icon
+          x-small
+          depressed
+          class="ml-1"
+          color="red"
+          @click.prevent.stop="$store.dispatch('removeProfile', profile.id)"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
       </v-tab>
     </v-tabs>
 
@@ -33,3 +45,9 @@ export default class ManagerView extends Vue {
   }
 }
 </script>
+
+<style lang="scss">
+.profile-tab {
+  text-transform: none;
+}
+</style>

@@ -1,20 +1,16 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-const webpack = require("webpack");
 const { defineConfig } = require("@vue/cli-service");
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
 module.exports = defineConfig({
   transpileDependencies: ["vuetify"],
   configureWebpack: {
     resolve: {
       fallback: {
-        stream: require.resolve("stream-browserify"),
-        buffer: require.resolve("buffer"),
+        crypto: require.resolve("crypto-browserify"),
+        path: require.resolve("path-browserify"),
+        fs: require.resolve("browserify-fs"),
       },
     },
-    plugins: [
-      new webpack.ProvidePlugin({
-        Buffer: ["buffer", "Buffer"],
-      }),
-    ],
+    plugins: [new NodePolyfillPlugin()],
   },
 });
