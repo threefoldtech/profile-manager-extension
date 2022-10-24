@@ -1,43 +1,66 @@
 <template>
   <section>
     <v-tabs centered v-model="tab">
-      <v-tab v-for="tab in tabs" :key="tab">
+      <v-tab v-for="tab in ['Activate Profile Manager', 'Create Profile Manager']" :key="tab">
         {{ tab }}
       </v-tab>
     </v-tabs>
 
-    <v-form ref="form" @submit.prevent="onLogin">
-      <v-text-field
-        label="Password"
-        placeholder="Profile Manager Password"
-        :rules="[() => false]"
-      ></v-text-field>
+    <v-form v-model="valid" @submit.prevent="onLogin">
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-text-field
+            v-bind="attrs"
+            v-on="on"
+            label="Password"
+            placeholder="Profile Manager Password"
+            :rules="[
+              required('Password is required.'),
+              minLength(2, 'Password minLength is 2 chars.'),
+              maxLength(16, 'Password maxLength is 16 chars.'),
+            ]"
+            ref="input"
+            :type="show ? 'text' : 'password'"
+            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append="show = !show"
+          ></v-text-field>
+        </template>
+        <span>Password will be used to encrypt data in the browser</span>
+      </v-tooltip>
+
+      <div class="d-flex mt-3">
+        <v-spacer />
+        <v-btn color="primary" depressed type="submit" :disabled="!valid">
+          {{ tab === 0 ? "Load Profiles" : "Create New Profile Manager" }}
+        </v-btn>
+        <v-spacer />
+      </div>
     </v-form>
-    <!-- <v-tabs-items v-model="tab">
-      <v-tab-item v-for="tab in tabs" :key="tab">
-        <v-card>
-          <v-card-text>{{ tab }}</v-card-text>
-        </v-card>
-      </v-tab-item>
-    </v-tabs-items> -->
   </section>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
+import { Component, Vue } from "vue-property-decorator";
+import { required, minLength, maxLength } from "@/utils/validators";
 
 @Component({
   name: "ProfileLogin",
+  methods: {
+    required,
+    minLength,
+    maxLength,
+  },
 })
 export default class ProfileLogin extends Vue {
-  tabs = ["Activate Profile Manager", "Create Profile Manager"];
+  show = false;
 
   tab = 0;
 
-  mounted() {
-    console.log(this.$refs.form);
+  valid = false;
 
-    (this.$refs.form as any).validate();
+  mounted() {
+    (this.$refs.input as any).focus();
+    console.log(this.$refs.form);
   }
 
   onLogin() {
