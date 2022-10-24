@@ -1,5 +1,5 @@
 <template>
-  <v-card class="ma-3">
+  <v-card class="ma-3" width="750">
     <v-card-title> Profile Manager </v-card-title>
     <v-card-subtitle>
       Please visit <a class="text-decoration-none" href="#!" target="_blank">the manual</a> to

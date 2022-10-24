@@ -23,9 +23,16 @@
             :type="show ? 'text' : 'password'"
             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="show = !show"
+            v-model="password"
           ></v-text-field>
         </template>
-        <span>Password will be used to encrypt data in the browser</span>
+        <span>
+          {{
+            tab === 0
+              ? "Password to activate a previously configured profile manager"
+              : "Password will be used to encrypt data in the browser"
+          }}</span
+        >
       </v-tooltip>
 
       <div class="d-flex mt-3">
@@ -52,9 +59,11 @@ import { required, minLength, maxLength } from "@/utils/validators";
   },
 })
 export default class ProfileLogin extends Vue {
+  tab = 0;
+
   show = false;
 
-  tab = 0;
+  password = "";
 
   valid = false;
 
