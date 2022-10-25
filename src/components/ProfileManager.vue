@@ -37,6 +37,7 @@
 </template>
 
 <script lang="ts">
+import { saveState } from "@/store";
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({
@@ -50,6 +51,13 @@ export default class ProfileManager extends Vue {
       color: "primary",
       outlined: true,
       fn: () => this.$store.dispatch("addProfile"),
+    },
+    {
+      label: "Save",
+      icon: "content-save",
+      color: "primary",
+      outlined: false,
+      fn: saveState,
     },
     {
       label: "Deactivate",

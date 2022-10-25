@@ -1,7 +1,4 @@
-import store from "./store";
-
-window.profileManager = store;
-type _Commands = "GetState" | "SetState" | "CheckSecret" | "CreateSecret";
+type _Commands = "GetState" | "SetState" | "CheckSecret" | "SaveState" | "LoadState";
 export type Commands = {
   [K in _Commands]: string;
 };

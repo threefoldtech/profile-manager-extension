@@ -1,6 +1,7 @@
 <template>
   <v-app>
     <v-main>
+      {{ $store.state }}
       <ProfileManager>
         <ProfileLogin v-if="$store.getters.isLogin" />
         <ManagerView v-else />

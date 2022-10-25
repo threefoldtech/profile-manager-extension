@@ -99,10 +99,17 @@ function handleMessage(message, _sender, sendResponse) {
       break;
     }
 
-    case cmds.CreateSecret: {
-      const { secret, profiles } = message.payload;
-      localStorage.setItem(`${VERSION}.${secret}`, JSON.stringify(profiles));
+    case cmds.SaveState: {
+      const { secret, store } = message.payload;
+      localStorage.setItem(`${VERSION}.${secret}`, store);
       sendResponse(true);
+      break;
+    }
+
+    case cmds.LoadState: {
+      const secret = message.payload;
+      const store = localStorage.getItem(`${VERSION}.${secret}`);
+      sendResponse(store);
       break;
     }
 

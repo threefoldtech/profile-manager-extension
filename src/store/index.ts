@@ -1,8 +1,12 @@
 // eslint-disable-next-line import/no-unresolved
 import { NetworkEnv } from "grid3_client";
 import Vue from "vue";
-import Vuex from "vuex";
+import Vuex, { Store } from "vuex";
 import { v4 } from "uuid";
+import { enc } from "crypto-js";
+import md5 from "crypto-js/md5";
+import { encrypt, decrypt } from "crypto-js/aes";
+import sendMessage from "@/utils/send_message";
 
 Vue.use(Vuex);
 
@@ -45,7 +49,7 @@ export function createProfile(options: Partial<Profile> = {}): Profile {
   };
 }
 
-export default new Vuex.Store<ProfilesStore>({
+const store: Store<ProfilesStore> = new Vuex.Store<ProfilesStore>({
   state: {
     secret: "",
     profiles: [createProfile({ id: "primary" })],
@@ -67,6 +71,17 @@ export default new Vuex.Store<ProfilesStore>({
       } as FullProfile;
     },
     isLogin: (state) => state.isLogin,
+    encryptedSecret: (state) => md5(state.secret).toString(),
+    encryptedData(state) {
+      // prettier-ignore
+      return {
+        secret: store.getters.encryptedSecret,
+        store: encrypt(
+          JSON.stringify({ profiles: state.profiles, active: state.active }),
+          store.getters.encryptedSecret,
+        ).toString(),
+      };
+    },
   },
   mutations: {
     ADD_PROFILE(state) {
@@ -87,24 +102,41 @@ export default new Vuex.Store<ProfilesStore>({
     },
   },
   actions: {
-    initState({ state }, payload: ProfilesStore) {
+    initState({ state, commit }, payload: ProfilesStore) {
+      commit("SET_LOGIN", payload.isLogin);
       state.active = payload.active;
-      state.isLogin = payload.isLogin;
       state.profiles = payload.profiles;
       state.secret = payload.secret;
     },
-    addProfile({ commit }) {
+    async addProfile({ commit }) {
       commit("ADD_PROFILE");
+      // eslint-disable-next-line no-use-before-define
+      await saveState();
     },
-    removeProfile({ commit }, id: string) {
+    async removeProfile({ commit }, id: string) {
       commit("REMOVE_PROFILE", id);
+      // eslint-disable-next-line no-use-before-define
+      await saveState();
     },
-    activateProfile({ commit }, payload: Active | null) {
+    async activateProfile({ commit }, payload: Active | null) {
       commit("ACTIVATE_PROFILE", payload);
+      // eslint-disable-next-line no-use-before-define
+      await saveState();
     },
     setLogin({ commit }, isLogin: boolean) {
       commit("SET_LOGIN", isLogin);
     },
+    loadStore({ state }, loadedStore: string) {
+      const data = decrypt(loadedStore, store.getters.encryptedSecret).toString(enc.Utf8);
+      const { profiles, active } = JSON.parse(data);
+      state.active = active;
+      state.profiles = profiles;
+    },
   },
-  modules: {},
 });
+
+export function saveState() {
+  return sendMessage({ cmd: "SaveState", payload: store.getters.encryptedData });
+}
+
+export default store;

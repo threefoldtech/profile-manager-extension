@@ -5,6 +5,7 @@ interface Message {
   payload?: unknown;
 }
 
+// prettier-ignore
 export default function sendMessage<T>(message: Message) {
   return new Promise<T>((res) => {
     window.chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {

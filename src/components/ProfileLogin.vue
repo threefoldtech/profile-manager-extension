@@ -51,6 +51,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { required, minLength, maxLength } from "@/utils/validators";
+import { saveState } from "@/store";
 import sendMessage from "@/utils/send_message";
 
 @Component({
@@ -84,11 +85,16 @@ export default class ProfileLogin extends Vue {
   async onLogin() {
     const checkSecret = await sendMessage<boolean>({
       cmd: "CheckSecret",
-      payload: this.$store.state.secret,
+      payload: this.$store.getters.encryptedSecret,
     });
 
     if (checkSecret) {
       if (this.tab === 0) {
+        const store = await sendMessage({
+          cmd: "LoadState",
+          payload: this.$store.getters.encryptedSecret,
+        });
+        this.$store.dispatch("loadStore", store);
         this.$store.dispatch("setLogin", false);
       } else {
         this.error = "Password already exists.";
@@ -99,10 +105,7 @@ export default class ProfileLogin extends Vue {
     if (this.tab === 0) {
       this.error = "Password is not correct.";
     } else {
-      await sendMessage({
-        cmd: "CreateSecret",
-        payload: { secret: this.$store.state.secret, profiles: this.$store.getters.profiles },
-      });
+      await saveState();
       this.$store.dispatch("setLogin", false);
     }
   }
