@@ -87,6 +87,12 @@ export default new Vuex.Store<ProfilesStore>({
     },
   },
   actions: {
+    initState({ state }, payload: ProfilesStore) {
+      state.active = payload.active;
+      state.isLogin = payload.isLogin;
+      state.profiles = payload.profiles;
+      state.secret = payload.secret;
+    },
     addProfile({ commit }) {
       commit("ADD_PROFILE");
     },

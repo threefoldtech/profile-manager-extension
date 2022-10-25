@@ -52,18 +52,11 @@ export default class ProfileManager extends Vue {
       fn: () => this.$store.dispatch("addProfile"),
     },
     {
-      label: "Save",
-      icon: "content-save",
-      color: "primary",
-      outlined: false,
-      fn: () => console.log("save"),
-    },
-    {
       label: "Deactivate",
       icon: "exit-to-app",
       color: "red",
       outlined: false,
-      fn: () => console.log("return to secret page"),
+      fn: () => this.$store.dispatch("setLogin", true),
     },
   ];
 }

@@ -1,6 +1,6 @@
 <template>
   <section>
-    <v-tabs centered v-model="tab">
+    <v-tabs centered v-model="tab" @change="resetError">
       <v-tab v-for="tab in ['Activate Profile Manager', 'Create Profile Manager']" :key="tab">
         {{ tab }}
       </v-tab>
@@ -20,10 +20,12 @@
               maxLength(16, 'Password maxLength is 16 chars.'),
             ]"
             ref="input"
+            :error-messages="error"
             :type="show ? 'text' : 'password'"
             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="show = !show"
             v-model="$store.state.secret"
+            @change="resetError"
           ></v-text-field>
         </template>
         <span>
@@ -49,6 +51,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { required, minLength, maxLength } from "@/utils/validators";
+import sendMessage from "@/utils/send_message";
 
 @Component({
   name: "ProfileLogin",
@@ -65,13 +68,43 @@ export default class ProfileLogin extends Vue {
 
   valid = false;
 
+  error: string | null = null;
+
+  resetError(): void {
+    if (this.error) {
+      this.error = null;
+    }
+  }
+
   mounted() {
     const input = this.$refs.input as unknown as { focus(): void };
     input.focus();
   }
 
-  onLogin() {
-    this.$store.dispatch("setLogin", false);
+  async onLogin() {
+    const checkSecret = await sendMessage<boolean>({
+      cmd: "CheckSecret",
+      payload: this.$store.state.secret,
+    });
+
+    if (checkSecret) {
+      if (this.tab === 0) {
+        this.$store.dispatch("setLogin", false);
+      } else {
+        this.error = "Password already exists.";
+      }
+      return;
+    }
+
+    if (this.tab === 0) {
+      this.error = "Password is not correct.";
+    } else {
+      await sendMessage({
+        cmd: "CreateSecret",
+        payload: { secret: this.$store.state.secret, profiles: this.$store.getters.profiles },
+      });
+      this.$store.dispatch("setLogin", false);
+    }
   }
 }
 </script>
