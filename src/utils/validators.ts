@@ -17,7 +17,7 @@ export function maxLength(max: number, msg: string) {
 }
 
 // prettier-ignore
-export async function testMnemonicOnGrid(network: NetworkEnv, mnemonics: string): Promise<boolean> {
+export async function getGrid(network: NetworkEnv, mnemonics: string): Promise<GridClient> {
   const grid = new GridClient(
     network,
     mnemonics,
@@ -25,11 +25,6 @@ export async function testMnemonicOnGrid(network: NetworkEnv, mnemonics: string)
     new HTTPMessageBusClient(0, "", "", ""),
   );
 
-  try {
-    await grid.connect();
-    await grid.disconnect();
-    return true;
-  } catch {
-    return false;
-  }
+  await grid.connect();
+  return grid;
 }

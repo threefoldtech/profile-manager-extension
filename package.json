@@ -22,6 +22,7 @@
     "vuex": "^3.6.2"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.199",
     "@types/jest": "^27.0.1",
     "@types/uuid": "^8.3.4",
     "@types/validator": "^13.7.9",

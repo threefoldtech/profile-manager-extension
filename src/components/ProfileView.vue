@@ -2,7 +2,12 @@
   <v-form v-model="valid" @submit.prevent="activateProfile">
     <div class="d-flex">
       <v-spacer />
-      <v-btn color="primary" :disabled="isActiveProfile || !valid">
+      <v-btn
+        color="primary"
+        type="submit"
+        :loading="loading"
+        :disabled="isActiveProfile || loading || !valid"
+      >
         {{ isActiveProfile ? "Active" : "Activate" }}
       </v-btn>
     </div>
@@ -17,6 +22,7 @@
         maxLength(15, 'Profile Name maxLength is 15 chars.'),
       ]"
       v-model="profile.name"
+      :readonly="isActiveProfile || loading"
     ></v-text-field>
 
     <v-select
@@ -25,6 +31,7 @@
       item-value="value"
       v-model="profile.network"
       label="Select a network"
+      :readonly="isActiveProfile || loading"
     />
 
     <v-text-field
@@ -34,8 +41,15 @@
       :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
       @click:append="show = !show"
       v-model="profile.mnemonics"
+      ref="mnemonicsInput"
       :rules="[required('Mnemonics is required.'), validateMnemonic]"
+      :readonly="isActiveProfile || loading"
     ></v-text-field>
+
+    <template v-if="isActiveProfile">
+      <v-text-field label="Twin ID" type="number" readonly :value="activeProfile.twinId" />
+      <v-text-field label="Address" readonly :value="activeProfile.address" />
+    </template>
 
     <div class="d-flex pr-1">
       <v-text-field
@@ -51,12 +65,17 @@
             return required('Public SSH Key is requried.')(value);
           },
         ]"
+        :readonly="isActiveProfile || loading"
       ></v-text-field>
 
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
           <div v-bind="attrs" v-on="on">
-            <v-switch v-model="profile.disableSSH" @change="$refs.ssh.validate()" />
+            <v-switch
+              :readonly="isActiveProfile || loading"
+              v-model="profile.disableSSH"
+              @change="$refs.ssh.validate()"
+            />
           </div>
         </template>
         <span>On disable the deployed solutions'll be inaccessible.</span>
@@ -66,9 +85,12 @@
 </template>
 
 <script lang="ts">
+// eslint-disable-next-line import/no-unresolved
+import { NetworkEnv } from "grid3_client";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { Profile, FullProfile } from "@/store";
-import { required, minLength, maxLength } from "@/utils/validators";
+// eslint-disable-next-line object-curly-newline
+import { required, minLength, maxLength, getGrid } from "@/utils/validators";
 import { validateMnemonic } from "bip39";
 
 @Component({
@@ -86,15 +108,17 @@ export default class ProfileView extends Vue {
   @Prop({ required: true }) profile!: Profile;
 
   networks = [
-    { name: "Mainnet", value: "main" },
-    { name: "Testnet", value: "test" },
-    { name: "QAnet", value: "qa" },
-    { name: "Devnet", value: "dev" },
+    { name: "Mainnet", value: NetworkEnv.main },
+    { name: "Testnet", value: NetworkEnv.test },
+    { name: "QAnet", value: NetworkEnv.qa },
+    { name: "Devnet", value: NetworkEnv.dev },
   ];
 
   show = false;
 
   valid = false;
+
+  loading = false;
 
   get activeProfile(): FullProfile {
     return this.$store.getters.activeProfile;
@@ -109,8 +133,25 @@ export default class ProfileView extends Vue {
     input.focus();
   }
 
-  activateProfile() {
-    console.log("activating", this.profile);
+  async activateProfile() {
+    const { id, network, mnemonics } = this.profile;
+
+    try {
+      this.loading = true;
+      const grid = await getGrid(network, mnemonics);
+      this.$store.dispatch("activateProfile", {
+        id,
+        twinId: await grid.twins.get_my_twin_id(),
+        address: grid.twins.client.client.address,
+      });
+      await grid.disconnect();
+      this.loading = false;
+    } catch {
+      const input = this.$refs.mnemonicsInput as unknown as { validate(): void; focus(): void };
+      input.validate();
+      input.focus();
+      this.loading = false;
+    }
   }
 }
 </script>

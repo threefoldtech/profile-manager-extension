@@ -23,7 +23,7 @@
             :type="show ? 'text' : 'password'"
             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append="show = !show"
-            v-model="password"
+            v-model="$store.state.secret"
           ></v-text-field>
         </template>
         <span>
@@ -63,8 +63,6 @@ export default class ProfileLogin extends Vue {
 
   show = false;
 
-  password = "";
-
   valid = false;
 
   mounted() {
@@ -73,7 +71,7 @@ export default class ProfileLogin extends Vue {
   }
 
   onLogin() {
-    console.log("test", this);
+    this.$store.dispatch("setLogin", false);
   }
 }
 </script>

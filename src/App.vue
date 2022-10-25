@@ -2,8 +2,8 @@
   <v-app>
     <v-main>
       <ProfileManager>
-        <!-- <ProfileLogin /> -->
-        <ManagerView />
+        <ProfileLogin v-if="$store.getters.isLogin" />
+        <ManagerView v-else />
       </ProfileManager>
     </v-main>
   </v-app>
