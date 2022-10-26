@@ -1,23 +1,41 @@
 {
   "manifest_version": 2,
   "name": "Profile Manager",
-  "version": "1",
+  "version": "1.0.0",
   "icons": {
-    "16": "./favicon.ico"
+    "16": "profile.png",
+    "48": "profile.png",
+    "128": "profile.png",
+    "256": "profile.png"
   },
-  "browser_action": {
+  "page_action": {
     "default_popup": "index.html",
     "default_icon": {
-      "19": "./favicon.ico"
+      "16": "profile.png",
+      "48": "profile.png",
+      "128": "profile.png",
+      "256": "profile.png"
     }
   },
   "permissions": ["tabs", "storage"],
   "content_scripts": [
     {
-      "matches": ["https://play.dev.grid.tf/*"],
+      "matches": [
+        "https://play.grid.tf/*",
+        "https://play.test.grid.tf/*",
+        "https://play.qa.grid.tf/*",
+        "https://play.dev.grid.tf/*",
+        "http://localhost:8080/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*"
+      ],
       "js": ["inject.js", "$$cmds.js", "bus.js"]
     }
   ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
   "web_accessible_resources": ["store.js"],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }
