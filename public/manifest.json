@@ -1,6 +1,6 @@
 {
-  "manifest_version": 2,
-  "name": "Profile Manager",
+  "manifest_version": 3,
+  "name": "Threefold Profile Manager",
   "version": "1.0.0",
   "icons": {
     "16": "profile.png",
@@ -8,7 +8,7 @@
     "128": "profile.png",
     "256": "profile.png"
   },
-  "page_action": {
+  "action": {
     "default_popup": "index.html",
     "default_icon": {
       "16": "profile.png",
@@ -25,7 +25,13 @@
         "https://play.test.grid.tf/*",
         "https://play.qa.grid.tf/*",
         "https://play.dev.grid.tf/*",
+        "https://dashboard.grid.tf/*",
+        "https://dashboard.test.grid.tf/*",
+        "https://dashboard.qa.grid.tf/*",
+        "https://dashboard.dev.grid.tf/*",
         "http://localhost:8080/*",
+        "http://localhost:8081/*",
+        "http://localhost:8082/*",
         "http://localhost:3000/*",
         "http://localhost:3001/*"
       ],
@@ -33,9 +39,12 @@
     }
   ],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker": "background.js"
   },
-  "web_accessible_resources": ["store.js"],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "web_accessible_resources": [
+    { "resources": ["store.js"], "matches": ["<all_urls>"] }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
 }

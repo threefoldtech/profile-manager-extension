@@ -137,7 +137,9 @@ export default class ProfileView extends Vue {
 
   resetError(): void {
     if (this.error !== null) {
+      const input = this.$refs.mnemonicsInput as unknown as { validate(): void };
       this.error = null;
+      input.validate();
     }
   }
 
