@@ -31,7 +31,7 @@
       item-value="value"
       v-model="profile.network"
       label="Select a network"
-      :readonly="isActiveProfile || loading"
+      :readonly="isKnownNetwork || isActiveProfile || loading"
     />
 
     <v-text-field
@@ -44,6 +44,8 @@
       ref="mnemonicsInput"
       :rules="[required('Mnemonics is required.'), validateMnemonic]"
       :readonly="isActiveProfile || loading"
+      :error-messages="error"
+      @change="resetError"
     ></v-text-field>
 
     <template v-if="isActiveProfile">
@@ -52,7 +54,8 @@
     </template>
 
     <div class="d-flex pr-1">
-      <v-text-field
+      <v-textarea
+        no-resize
         class="mr-3"
         label="Public SSH Key"
         placeholder="Your public SSH key will be added as default to all deployments."
@@ -66,7 +69,7 @@
           },
         ]"
         :readonly="isActiveProfile || loading"
-      ></v-text-field>
+      ></v-textarea>
 
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -128,6 +131,28 @@ export default class ProfileView extends Vue {
     return this.activeProfile?.id === this.profile.id;
   }
 
+  isKnownNetwork = true;
+
+  error: string | null = null;
+
+  resetError(): void {
+    if (this.error !== null) {
+      this.error = null;
+    }
+  }
+
+  created() {
+    window.chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (tab && tab.url) {
+        if (tab.url.includes("play.grid.tf")) this.profile.network = NetworkEnv.main;
+        else if (tab.url.includes("play.test.grid.tf")) this.profile.network = NetworkEnv.test;
+        else if (tab.url.includes("play.qa.grid.tf")) this.profile.network = NetworkEnv.qa;
+        else if (tab.url.includes("play.dev.grid.tf")) this.profile.network = NetworkEnv.dev;
+        else this.isKnownNetwork = false;
+      }
+    });
+  }
+
   mounted() {
     const input = this.$refs.input as unknown as { focus(): void };
     input.focus();
@@ -146,9 +171,9 @@ export default class ProfileView extends Vue {
       });
       await grid.disconnect();
       this.loading = false;
-    } catch {
-      const input = this.$refs.mnemonicsInput as unknown as { validate(): void; focus(): void };
-      input.validate();
+    } catch (e) {
+      const input = this.$refs.mnemonicsInput as unknown as { focus(): void };
+      this.error = (e as unknown as Error).message;
       input.focus();
       this.loading = false;
     }

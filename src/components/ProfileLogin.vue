@@ -94,8 +94,8 @@ export default class ProfileLogin extends Vue {
           cmd: "LoadState",
           payload: this.$store.getters.encryptedSecret,
         });
-        this.$store.dispatch("loadStore", store);
         this.$store.dispatch("setLogin", false);
+        this.$store.dispatch("loadStore", store);
       } else {
         this.error = "Password already exists.";
       }
