@@ -17,7 +17,7 @@
       "256": "profile.png"
     }
   },
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "declarativeContent", "activeTab"],
   "content_scripts": [
     {
       "matches": [
@@ -42,7 +42,24 @@
     "service_worker": "background.js"
   },
   "web_accessible_resources": [
-    { "resources": ["store.js"], "matches": ["<all_urls>"] }
+    {
+      "resources": ["store.js"],
+      "matches": [
+        "https://play.grid.tf/*",
+        "https://play.test.grid.tf/*",
+        "https://play.qa.grid.tf/*",
+        "https://play.dev.grid.tf/*",
+        "https://dashboard.grid.tf/*",
+        "https://dashboard.test.grid.tf/*",
+        "https://dashboard.qa.grid.tf/*",
+        "https://dashboard.dev.grid.tf/*",
+        "http://localhost:8080/*",
+        "http://localhost:8081/*",
+        "http://localhost:8082/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*"
+      ]
+    }
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"

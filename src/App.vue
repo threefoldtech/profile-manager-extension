@@ -30,7 +30,7 @@ export default class App extends Vue {
   async created(): Promise<void> {
     const state = await sendMessage<ProfilesStore>({ cmd: "GetState" });
 
-    if (state !== null) {
+    if (state) {
       this.$store.dispatch("initState", state);
     } else {
       await sendMessage<boolean>({ cmd: "SetState", payload: this.$store.state });

@@ -1,8 +1,5 @@
 const VERSION = "v0.0.1-alpha";
 
-// activate page
-window.chrome.runtime.sendMessage({ message: "PROFILE_MANAGER_ACTIVATE_ICON" });
-
 /**
  * @typedef { import('../src/config').Commands } Commands
  */
