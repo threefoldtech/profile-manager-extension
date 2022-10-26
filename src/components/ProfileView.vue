@@ -32,6 +32,7 @@
       v-model="profile.network"
       label="Select a network"
       :readonly="isKnownNetwork || isActiveProfile || loading"
+      @change="resetError"
     />
 
     <v-text-field
@@ -45,7 +46,7 @@
       :rules="[required('Mnemonics is required.'), validateMnemonic]"
       :readonly="isActiveProfile || loading"
       :error-messages="error"
-      @change="resetError"
+      @input="resetError()"
     ></v-text-field>
 
     <template v-if="isActiveProfile">
@@ -136,10 +137,8 @@ export default class ProfileView extends Vue {
   error: string | null = null;
 
   resetError(): void {
-    if (this.error !== null) {
-      const input = this.$refs.mnemonicsInput as unknown as { validate(): void };
+    if (this.error) {
       this.error = null;
-      input.validate();
     }
   }
 
@@ -174,7 +173,8 @@ export default class ProfileView extends Vue {
       await grid.disconnect();
       this.loading = false;
     } catch (e) {
-      const input = this.$refs.mnemonicsInput as unknown as { focus(): void };
+      const input = this.$refs.mnemonicsInput as unknown as { blur(): void; focus(): void };
+      input.blur();
       this.error = (e as unknown as Error).message;
       input.focus();
       this.loading = false;
